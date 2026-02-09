@@ -1,66 +1,210 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PHP_LARAVEL12_QUERY_BUILDER
+```php
+Laravel 12 based Query Builder CRUD Web Application built using clean MVC architecture and Blade UI.
+```
+# Key Features
+```php
+- Web Based Student Management CRUD
+- Query Builder Database Operations
+- Blade + Bootstrap UI
+- MVC Architecture Implementation
+- Laravel 12 Compatible
+- Beginner Friendly Project Structure
+```
+# Step 1: Install Fresh Laravel 12 Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Open Terminal / Command Prompt and run:
+```php
+composer create-project laravel/laravel:^12.0 PHP_Laravel12_Query_Builder
+```
+Move into project directory:
+```php
+cd PHP_Laravel12_Query_Builder
+```
+Generate application key:
+```php
+php artisan key:generate
+```
+# Explanation
+```php
+- Installs fresh Laravel 12 project
+- Application key is required for encryption and security
+```
+# Step 2: Configure Environment & Database
+Open .env file and update database configuration:
+```php
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3307
+DB_DATABASE=php_laravel12_query_builder
+DB_USERNAME=root
+DB_PASSWORD=
+```
+Save the file.
+Run default migrations:
+```php
+php artisan migrate
+```
+# Explanation
+```php
+- .env manages environment configuration
+- Migrations create default Laravel tables
+```
+# Step 3: Create Students Database Table
+Create migration:
+```php
+php artisan make:migration create_students_table
+```
+```php
+<?php
 
-## About Laravel
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+   public function up()
+{
+    Schema::create('students', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->unique();
+        $table->integer('age');
+        $table->timestamps();
+    });
+}
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('students');
+    }
+};
+```
+Run migration:
+```php
+php artisan migrate
+```
+# Explanation
+```php
+- Creates students table
+- Stores student data for CRUD operations
+```
+# Step 4: Create Student Controller
+Create controller:
+```php
+php artisan make:controller StudentController
+```
+# Explanation
+```php
+- Controller handles business logic
+- Query Builder queries are written inside controller
+```
+# Step 5: Configure Web Routes
+Open routes/web.php
+```php
+<?php
 
-## Learning Laravel
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentController;
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Route::get('/', function () {
+    return view('welcome');
+});
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+// Route::get('/insert', [StudentController::class, 'insert']);
+// Route::get('/students', [StudentController::class, 'index']);
+// Route::get('/student/{id}', [StudentController::class, 'single']);
+// Route::get('/update/{id}', [StudentController::class, 'update']);
+// Route::get('/delete/{id}', [StudentController::class, 'delete']);
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Route::get('/students', [StudentController::class, 'index']);
+Route::get('/students/create', [StudentController::class, 'create']);
+Route::post('/students/store', [StudentController::class, 'store']);
+Route::get('/students/edit/{id}', [StudentController::class, 'edit']);
+Route::post('/students/update/{id}', [StudentController::class, 'update']);
+Route::get('/students/delete/{id}', [StudentController::class, 'delete']);
+```
+# Explanation
+```php
+- Defines all CRUD web routes
+- Handles form submission and navigation
+```
+# Step 6: Blade UI Structure
+Views Folder Structure:
+```php
+resources/views/
+   layouts/app.blade.php
+   students/index.blade.php
+   students/create.blade.php
+   students/edit.blade.php
+```
+# Explanation
+```php
+- Layout = Common UI structure
+- Index = Student list page
+- Create = Add student form
+- Edit = Update student form
+```
+# Step 7: Run Laravel Project
+Start Laravel development server:
+```php
+php artisan serve
+```
+Open Browser:
+```php
+http://127.0.0.1:8000/students
+```
+<img width="1295" height="526" alt="image" src="https://github.com/user-attachments/assets/3eb3fa2d-83fb-4911-b04c-0f26a209208b" />
 
-## Laravel Sponsors
+Create Student Page:
+```php
+http://127.0.0.1:8000/students/create
+```
+<img width="1308" height="529" alt="image" src="https://github.com/user-attachments/assets/6942e314-5478-45fc-8b72-f60d5f92f633" />
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Edit Student Page:
+```php
+http://127.0.0.1:8000/students/edit/1
+```
+<img width="1283" height="492" alt="image" src="https://github.com/user-attachments/assets/14266593-adff-4624-b68c-b3af1356d5e5" />
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Explanation
+```php
+- Runs Laravel locally
+- Opens full web CRUD application
+```
+# Project Folder Structure
+```php
+PHP_LARAVEL12_QUERY_BUILDER
+├── app/
+│   └── Http/
+│       └── Controllers/
+│           └── StudentController.php
+│
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   └── app.blade.php
+│       └── students/
+│           ├── index.blade.php
+│           ├── create.blade.php
+│           └── edit.blade.php
+│
+├── routes/
+│   └── web.php
+│
+├── database/
+│   └── migrations/
+│
+├── .env
+├── artisan
+└── composer.json
+```
