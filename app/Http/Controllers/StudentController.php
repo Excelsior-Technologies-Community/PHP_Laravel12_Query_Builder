@@ -8,10 +8,40 @@ use Illuminate\Support\Facades\DB;
 class StudentController extends Controller
 {
     // LIST PAGE
-    public function index()
+    public function index(Request $request)
     {
-        $students = DB::table('students')->get();
-        return view('students.index', compact('students'));
+        $students = DB::table('students')
+
+            // Search
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            })
+
+            // Sorting
+            ->when($request->sort == 'age_asc', function ($query) {
+                $query->orderBy('age', 'asc');
+            })
+
+            ->when($request->sort == 'age_desc', function ($query) {
+                $query->orderBy('age', 'desc');
+            })
+
+            ->get();
+
+        // Dashboard Statistics
+        $totalStudents = DB::table('students')->count();
+        $averageAge = DB::table('students')->avg('age');
+        $youngest = DB::table('students')->min('age');
+        $oldest = DB::table('students')->max('age');
+
+        return view('students.index', compact(
+            'students',
+            'totalStudents',
+            'averageAge',
+            'youngest',
+            'oldest'
+        ));
     }
 
     // CREATE FORM
@@ -24,18 +54,24 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         DB::table('students')->insert([
-            'name'  => $request->name,
+            'name' => $request->name,
             'email' => $request->email,
-            'age'   => $request->age,
+            'age' => $request->age,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        return redirect('/students')->with('success', 'Student added successfully');
+        return redirect('/students')
+            ->with('success', 'Student added successfully');
     }
 
     // EDIT FORM
     public function edit($id)
     {
-        $student = DB::table('students')->where('id', $id)->first();
+        $student = DB::table('students')
+            ->where('id', $id)
+            ->first();
+
         return view('students.edit', compact('student'));
     }
 
@@ -45,18 +81,71 @@ class StudentController extends Controller
         DB::table('students')
             ->where('id', $id)
             ->update([
-                'name'  => $request->name,
+                'name' => $request->name,
                 'email' => $request->email,
-                'age'   => $request->age,
+                'age' => $request->age,
+                'updated_at' => now(),
             ]);
 
-        return redirect('/students')->with('success', 'Student updated successfully');
+        return redirect('/students')
+            ->with('success', 'Student updated successfully');
     }
 
     // DELETE
     public function delete($id)
     {
-        DB::table('students')->where('id', $id)->delete();
-        return redirect('/students')->with('success', 'Student deleted successfully');
+        DB::table('students')
+            ->where('id', $id)
+            ->delete();
+
+        return redirect('/students')
+            ->with('success', 'Student deleted successfully');
+    }
+
+    public function export(Request $request)
+    {
+        $students = DB::table('students')
+
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            })
+
+            ->when($request->sort == 'age_asc', function ($query) {
+                $query->orderBy('age', 'asc');
+            })
+
+            ->when($request->sort == 'age_desc', function ($query) {
+                $query->orderBy('age', 'desc');
+            })
+
+            ->get();
+
+        $fileName = 'students.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ];
+
+        $callback = function () use ($students) {
+
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['ID', 'Name', 'Email', 'Age']);
+
+            foreach ($students as $student) {
+                fputcsv($file, [
+                    $student->id,
+                    $student->name,
+                    $student->email,
+                    $student->age,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
