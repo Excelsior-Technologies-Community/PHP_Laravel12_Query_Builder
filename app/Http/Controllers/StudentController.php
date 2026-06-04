@@ -18,16 +18,27 @@ class StudentController extends Controller
                     ->orWhere('email', 'like', '%' . $request->search . '%');
             })
 
+            // Min Age Filter
+            ->when($request->min_age, function ($query) use ($request) {
+                $query->where('age', '>=', $request->min_age);
+            })
+
+            // Max Age Filter
+            ->when($request->max_age, function ($query) use ($request) {
+                $query->where('age', '<=', $request->max_age);
+            })
+
             // Sorting
             ->when($request->sort == 'age_asc', function ($query) {
                 $query->orderBy('age', 'asc');
             })
 
             ->when($request->sort == 'age_desc', function ($query) {
-                $query->orderBy('age', 'desc');
+                $query->orderBy('age', 'asc');
             })
 
-            ->get();
+            ->paginate(4)
+            ->withQueryString();
 
         // Dashboard Statistics
         $totalStudents = DB::table('students')->count();
@@ -63,6 +74,16 @@ class StudentController extends Controller
 
         return redirect('/students')
             ->with('success', 'Student added successfully');
+    }
+
+    // STUDENT DETAILS
+    public function show($id)
+    {
+        $student = DB::table('students')
+            ->where('id', $id)
+            ->first();
+
+        return view('students.show', compact('student'));
     }
 
     // EDIT FORM
@@ -102,6 +123,7 @@ class StudentController extends Controller
             ->with('success', 'Student deleted successfully');
     }
 
+    // EXPORT CSV
     public function export(Request $request)
     {
         $students = DB::table('students')
@@ -109,6 +131,14 @@ class StudentController extends Controller
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search . '%')
                     ->orWhere('email', 'like', '%' . $request->search . '%');
+            })
+
+            ->when($request->min_age, function ($query) use ($request) {
+                $query->where('age', '>=', $request->min_age);
+            })
+
+            ->when($request->max_age, function ($query) use ($request) {
+                $query->where('age', '<=', $request->max_age);
             })
 
             ->when($request->sort == 'age_asc', function ($query) {
